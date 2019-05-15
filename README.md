@@ -22,3 +22,8 @@ Some of those topics include:
 - [RVIZ Plugin for the HTC Vive](https://github.com/AndreGilerson/rviz_vive)
 
 ## Timeline
+- 5/17/2019 Unity 3D review
+- 5/24/2019 C# review
+- 5/31/2019 Connecting Unity 3D with ROS enabled robot
+- 6/07/2019 Connecting Unity 3D with ROS enabled robot
+- 6/14/2019 controlling ROS enabled robot from HTC Vive controllers
