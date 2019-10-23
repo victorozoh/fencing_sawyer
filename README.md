@@ -9,7 +9,6 @@ The final goal of this project is to develop a sword fighting robot. In addition
 exploring human robot interaction using tools and techniques from Computer Vision, Virtual Reality and Neural Networks.
 If time permits, secondary goals include:
 - Human-Robot interaction via virtual reality. For example Tele-operation.
-- Robot Learning via Virtual Reality
 
 The goal for the end of this quarter is to learn motion planning in ROS using the Moveit package.
 
@@ -21,14 +20,23 @@ The goal for the end of this quarter is to learn motion planning in ROS using th
 - Deep Learning/ Reinforcement Learning ROS node to learn and anticipate human motion (milestone 5)
 
 ## Components and Tools
-- ROS
+- Ubuntu 18.04
+- ROS Melodic
 - Unity 3D
 - HTC Vive Virtual Reality System
-- Baxter Robot, TurtleBot3 etc
+- Sawyer Robot
 
+## Installation Instructions
+- Follow the [instructions here](https://github.com/robosavvy/vive_ros) to install the vive_ros package and to install steam on your machine.
+- Disable headset requirement by editing the file at the location listed below
+```
+~/.steam/steam/steamapps/common/SteamVR/resources/settings/default.vrsettings
+```
+Change the saying ```"requireHmd":true ``` to ```"requireHmd": false ```
 ## Package References
 - [ROS to Unity connection package](https://github.com/h2r/ros_reality)
-- [RVIZ Plugin for the HTC Vive](https://github.com/AndreGilerson/rviz_vive)
+- [ROS Package for publishing HTC Vive device locations](https://github.com/robosavvy/vive_ros)
+
 
 ## Timeline
 There are 10 weeks in the quarter starting September 24, 2019. Tentative schedule is to spend 2 weeks on each
