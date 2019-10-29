@@ -1,0 +1,40 @@
+SETUP
+
+# connect to robot wired network
+nmcli connection up Rethink
+
+# alias for the above command
+rethink
+
+# view the connection status
+nmcli device status
+
+# test the connection
+ping sawyer.local
+
+
+TROUBLESHOOT ROBOT
+# reset the robot
+rosrun intera_interface enable_robot.py -r
+
+# enable the robot
+rosrun intera_interface enable_robot.py -e
+
+# get the robot state
+rosrun intera_interface enable_robot.py -s
+
+# put robot in zero position
+rosrun intera_examples go_to_joint_angles.py -q 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+
+
+TUTORIAL LINKS
+https://sdk.rethinkrobotics.com/intera/Motion_Interface_Tutorial#Go_to_Joint_Angles
+# documentation
+https://rethinkrobotics.github.io/intera_sdk_docs/5.0.4/intera_interface/html/intera_interface-module.html
+
+
+rostopic echo /robot/state -c
+
+ping sawyer.local
+rosrun intera_examples head_wobbler.py
+rosrun testpong gotocartesian.py
