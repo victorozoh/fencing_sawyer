@@ -1,0 +1,26 @@
+#include <ros/ros.h>
+#include <std_srvs/Empty.h>
+
+int main(int argc, char **argv)
+{
+  ros::init(argc, argv, "setOrigin");
+  ros::NodeHandle nh;
+
+  // wait for service to be advertised
+  ros::service::waitForService("/vive/set_origin", -1);
+  ros::ServiceClient client = nh.serviceClient<std_srvs::Empty>("/vive/set_origin");
+
+  std_srvs::Empty srv;
+  //std_srvs::Empty res;
+
+  if (client.call(srv))
+  {
+    ROS_INFO("Origin has been set");
+  }
+  else
+  {
+    ROS_WARN("Service call to set origin failed");
+  }
+
+  return 0;
+}

@@ -1,4 +1,19 @@
 <?xml version="1.0"?>
 <launch>
-  <include file="$(find vive_ros)/launch/vive.launch"/>
+  <!-- useful parameters and arguments-->
+  <arg name="robot_frame" default="torso"/>
+
+  <!-- include the ROS package for interacting with the HTC Vive -->
+  <include file="$(find vive_ros)/launch/vive.launch">
+    <arg name="desired_robot_frame" value="$(arg robot_frame)"/>
+  </include>
+
+  <!-- publish vive controller pose -->
+  <!-- <node pkg="fencing_sawyer" name="get_pose" type="get_pose.py"/> -->
+  <!-- track the vive pose -->
+  <!-- <node pkg="fencing_sawyer" name="vive_tracker_pose" type="vive_tracker_pose.py"/> -->
+
+  <!-- publish vive controller twist -->
+  <node pkg="fencing_sawyer" name="get_twist" type="get_twist.py"/>
+
 </launch>

@@ -1,0 +1,8 @@
+
+NOTES ON CHANGES MADE TO VIVE_ROS PACKAGE
+
+1. Modified the vive_node.cpp file to get a private parameter named robot_frame.
+The parameter is used to set the vive_tracker frame with respect to the sawyer robot.
+Created a private member named robot_world in the VIVEnode class.
+
+2. Modified the vive.launch file to set the parameter of the vive_node
