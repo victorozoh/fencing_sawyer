@@ -14,6 +14,17 @@
   <!-- <node pkg="fencing_sawyer" name="vive_tracker_pose" type="vive_tracker_pose.py"/> -->
 
   <!-- publish vive controller twist -->
-  <node pkg="fencing_sawyer" name="get_twist" type="get_twist.py"/>
+  <!-- <node pkg="fencing_sawyer" name="get_twist" type="get_twist.py"/> -->
+  <!-- track the vive twist -->
+  <!-- <node pkg="fencing_sawyer" name="vive_tracker_twist" type="vive_tracker_twist.py"/> -->
+
+  <!-- tf listener with respect to end effector -->
+  <node
+    pkg="fencing_sawyer"
+    name="twist_from_pose"
+    type="twist_from_pose2.py"
+    output="screen"
+    launch-prefix="xterm -e"
+  />
 
 </launch>
