@@ -21,7 +21,6 @@ y_vel = np.array([0, 1, 0])
 z_vel = np.array([0, 0, 1])
 
 def convert_twist(twist_msg):
-
     (pos, quat) = listener.lookupTransform('world', 'right_l6', rospy.Time(0))
 
     R = tf.transformations.quaternion_matrix(quat) # returns a homogenous matrix

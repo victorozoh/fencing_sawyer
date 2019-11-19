@@ -5,6 +5,7 @@ from intera_interface import Limb
 import modern_robotics as mr
 import numpy as np
 import tf
+import vlc
 from geometry_msgs.msg import Transform, Twist
 # get Slist from Jarvis description file
 import sawyer_MR_description as sw
@@ -16,6 +17,7 @@ eomg = 0.01 # positive tolerance on end-effector orientation error
 ev = 0.001 # positive tolerance on end-effector position error
 arm = None
 listener = None
+sound_player = vlc.MediaPlayer("/home/victor/sawyerws/src/fencing_sawyer/assets/light-saber-battle.mp3")
 x_vel = np.array([1, 0, 0])
 y_vel = np.array([0, 1, 0])
 z_vel = np.array([0, 0, 1])
@@ -58,40 +60,65 @@ def move(twist_msg):
 
 
 def main():
-    rospy.init_node("twist_from_pose")
+    rospy.init_node("intercept")
     global arm
     global listener
     arm = Limb()
     listener = tf.TransformListener()
+    old_tracker_pose = np.array([100, 100, 100])
+    # set the end effector twist
+    arm_twist = Twist()
+    no_twist = Twist()
+    no_twist.linear.x, no_twist.linear.y, no_twist.linear.z = 0, 0, 0
+    no_twist.angular.x, no_twist.angular.y, no_twist.angular.z = 0, 0, 0
 
-    rate = rospy.Rate(10.0)
+    rate = rospy.Rate(20.0)
     while not rospy.is_shutdown():
         try:
-            (controller_pos, controller_quat) = listener.lookupTransform('world', 'controller', rospy.Time(0))
+            # (controller_pos, controller_quat) = listener.lookupTransform('world', 'controller', rospy.Time(0))
+            (tracker_pos, tracker_quat) = listener.lookupTransform('world', 'tracker', rospy.Time(0))
             # (arm_position, arm_quat) = listener.lookupTransform('world', 'right_l6', rospy.Time(0))
             armpose = arm.endpoint_pose()
             arm_position = armpose['position']
         except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
             continue
 
-        # set the end effector twist
-        arm_twist = Twist()
-        controller_pos = np.array(controller_pos)
+        tracker_pos = np.array(tracker_pos)
         arm_position = np.array(arm_position)
-        displacement = controller_pos - arm_position
-        print(displacement)
+        displacement = tracker_pos - arm_position
+
         # set velocity in the direction of the displacement
-        # linear_vel = 0.02 * (displacement/np.linalg.norm(displacement))
-        vel = np.linalg.norm(displacement)
-        arm_twist.linear.x =  0.25 * displacement[0]/vel # np.linalg.norm(x_vel * np.dot(linear_vel, x_vel)/np.dot(x_vel, x_vel))
-        arm_twist.linear.y =  0.25 * displacement[1]/vel # np.linalg.norm(y_vel * np.dot(linear_vel, y_vel)/np.dot(y_vel, y_vel))
-        arm_twist.linear.z =  0.25 * displacement[2]/vel # np.linalg.norm(z_vel * np.dot(linear_vel, z_vel)/np.dot(z_vel, z_vel))
+        disp_mag = np.linalg.norm(displacement)
+        tracker_pos_mag = np.linalg.norm(tracker_pos)
+        print("displacement is {}".format(displacement))
+        print("The distance between the arm and tracker is {}".format(disp_mag))
+        #print("tracker position is {}".format(tracker_pos))
+        #print("distance is {}".format(tracker_pos_mag))
+
+        arm_twist.linear.x =  0.35 * displacement[0]/disp_mag
+        arm_twist.linear.y =  0.35 * displacement[1]/disp_mag
+        arm_twist.linear.z =  0.35 * displacement[2]/disp_mag
         arm_twist.angular.x = 0
         arm_twist.angular.y = 0
         arm_twist.angular.z = 0
 
-        move(arm_twist)
+        pos_diff = np.linalg.norm(old_tracker_pose) - tracker_pos_mag
 
+        sound_player.play()
+        if tracker_pos_mag < 0.99 and disp_mag > 0.15:
+            #pass
+            move(arm_twist)
+            sound_player.stop()
+        else:
+            #pass
+            move(no_twist)
+
+        # if disp_mag < 0.3:
+        #     move(arm_twist)
+        # else:
+        #     move(no_twist)
+
+        old_tracker_pose = tracker_pos
         rate.sleep()
 
 if __name__ == '__main__':

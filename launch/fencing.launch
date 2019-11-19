@@ -8,6 +8,8 @@
     <arg name="desired_robot_frame" value="$(arg robot_frame)"/>
   </include>
 
+  <!-- display image to sawyer's head -->
+  <node pkg="fencing_sawyer" name="display_head" type="display_head.py"/>
   <!-- publish vive controller pose -->
   <!-- <node pkg="fencing_sawyer" name="get_pose" type="get_pose.py"/> -->
   <!-- track the vive pose -->
@@ -21,10 +23,11 @@
   <!-- tf listener with respect to end effector -->
   <node
     pkg="fencing_sawyer"
-    name="twist_from_pose"
-    type="twist_from_pose2.py"
+    name="parry"
+    type="parry.py"
     output="screen"
-    launch-prefix="xterm -e"
+    launch-prefix="gnome-terminal --command"
   />
+  <!-- launch-prefix="xterm -e" -->
 
 </launch>
