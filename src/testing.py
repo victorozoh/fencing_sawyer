@@ -12,9 +12,11 @@ def main():
     try:
         rospy.init_node("get_arm_pose")
         arm = Limb()
-        armpose = arm.endpoint_pose()
-        print("position is {}".format(armpose['position']))
-        print("orientation is {}".format(armpose['orientation']))
+        # armpose = arm.endpoint_pose()
+        # print("position is {}".format(armpose['position']))
+        # print("orientation is {}".format(armpose['orientation']))
+        joints = arm.joint_angles()
+        print(joints)
         rospy.spin()
     except rospy.ROSInterruptException:
         rospy.logerr('Could not perform the requested motion.')

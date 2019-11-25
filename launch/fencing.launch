@@ -27,7 +27,9 @@
     type="parry.py"
     output="screen"
     launch-prefix="gnome-terminal --command"
-  />
-  <!-- launch-prefix="xterm -e" -->
+  >
+  </node>
+  <!-- play sound -->
+  <!-- <node pkg="fencing_sawyer" name="sound_player" type="soundplayer.py"/> -->
 
 </launch>

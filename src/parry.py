@@ -5,9 +5,7 @@ from intera_interface import Limb
 import modern_robotics as mr
 import numpy as np
 import tf
-import vlc
-from geometry_msgs.msg import Transform, Twist
-# get Slist from Jarvis description file
+from geometry_msgs.msg import Transform, Twist, TwistStamped
 import sawyer_MR_description as sw
 
 Blist = sw.Blist
@@ -17,10 +15,10 @@ eomg = 0.01 # positive tolerance on end-effector orientation error
 ev = 0.001 # positive tolerance on end-effector position error
 arm = None
 listener = None
-sound_player = vlc.MediaPlayer("/home/victor/sawyerws/src/fencing_sawyer/assets/light-saber-battle.mp3")
-x_vel = np.array([1, 0, 0])
-y_vel = np.array([0, 1, 0])
-z_vel = np.array([0, 0, 1])
+home_config = {'right_j6': -1.3186796875, 'right_j5': 0.5414912109375,
+               'right_j4': 2.9682451171875, 'right_j3': 1.7662939453125,
+               'right_j2': -3.0350302734375, 'right_j1': 1.1202939453125, 'right_j0': -0.0001572265625}
+
 
 def move(twist_msg):
     # have to switch the order of linear and angular velocities in twist
@@ -60,19 +58,19 @@ def move(twist_msg):
 
 
 def main():
-    rospy.init_node("intercept")
+    rospy.init_node("parry")
     global arm
     global listener
     arm = Limb()
     listener = tf.TransformListener()
-    old_tracker_pose = np.array([100, 100, 100])
+    old_tracker_pose = 0
     # set the end effector twist
     arm_twist = Twist()
     no_twist = Twist()
     no_twist.linear.x, no_twist.linear.y, no_twist.linear.z = 0, 0, 0
     no_twist.angular.x, no_twist.angular.y, no_twist.angular.z = 0, 0, 0
 
-    rate = rospy.Rate(20.0)
+    rate = rospy.Rate(10.0)
     while not rospy.is_shutdown():
         try:
             # (controller_pos, controller_quat) = listener.lookupTransform('world', 'controller', rospy.Time(0))
@@ -90,35 +88,35 @@ def main():
         # set velocity in the direction of the displacement
         disp_mag = np.linalg.norm(displacement)
         tracker_pos_mag = np.linalg.norm(tracker_pos)
-        print("displacement is {}".format(displacement))
+        print("distance between tracker and world {}".format(tracker_pos_mag))
         print("The distance between the arm and tracker is {}".format(disp_mag))
         #print("tracker position is {}".format(tracker_pos))
         #print("distance is {}".format(tracker_pos_mag))
 
-        arm_twist.linear.x =  0.35 * displacement[0]/disp_mag
-        arm_twist.linear.y =  0.35 * displacement[1]/disp_mag
-        arm_twist.linear.z =  0.35 * displacement[2]/disp_mag
+        arm_twist.linear.x =  0.20 * displacement[0]/disp_mag
+        arm_twist.linear.y =  0.20 * displacement[1]/disp_mag
+        arm_twist.linear.z =  0.20 * displacement[2]/disp_mag
         arm_twist.angular.x = 0
         arm_twist.angular.y = 0
         arm_twist.angular.z = 0
 
         pos_diff = np.linalg.norm(old_tracker_pose) - tracker_pos_mag
 
-        sound_player.play()
-        if tracker_pos_mag < 0.99 and disp_mag > 0.15:
+        # if user sword is less than 1.25m to robot
+        # and distance between robot arm and user sword is less than 0.15m
+        # and user sword is moving towards robot...
+        if tracker_pos_mag < 1.25 and disp_mag > 0.15:
             #pass
             move(arm_twist)
-            sound_player.stop()
-        else:
+        elif tracker_pos_mag > 1.25:
             #pass
+            #move(no_twist)
+            arm.set_joint_positions(home_config)
+        else:
             move(no_twist)
 
-        # if disp_mag < 0.3:
-        #     move(arm_twist)
-        # else:
-        #     move(no_twist)
 
-        old_tracker_pose = tracker_pos
+        old_tracker_pose = tracker_pos_mag
         rate.sleep()
 
 if __name__ == '__main__':

@@ -26,6 +26,9 @@ rosrun intera_interface enable_robot.py -s
 # put robot in zero position
 rosrun intera_examples go_to_joint_angles.py -q 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 
+# control the gripper
+rosrun intera_examples gripper_cuff_control.py -h
+
 
 TUTORIAL LINKS
 https://sdk.rethinkrobotics.com/intera/Motion_Interface_Tutorial#Go_to_Joint_Angles
