@@ -6,6 +6,7 @@ import modern_robotics as mr
 import numpy as np
 import tf
 from geometry_msgs.msg import Transform, Twist, TwistStamped
+from std_msgs.msg import Float64
 import sawyer_MR_description as sw
 
 Blist = sw.Blist
@@ -19,6 +20,8 @@ home_config = {'right_j6': -1.3186796875, 'right_j5': 0.5414912109375,
                'right_j4': 2.9682451171875, 'right_j3': 1.7662939453125,
                'right_j2': -3.0350302734375, 'right_j1': 1.1202939453125, 'right_j0': -0.0001572265625}
 
+sword_zoffset = 0.20
+sword_position = None
 
 def move(twist_msg):
     # have to switch the order of linear and angular velocities in twist
@@ -62,9 +65,11 @@ def main():
     global arm
     global listener
     arm = Limb()
+    pub = rospy.Publisher('clash', Float64,queue_size=1)
     listener = tf.TransformListener()
     old_tracker_pose = 0
     # set the end effector twist
+    sword_twist = Twist()
     arm_twist = Twist()
     no_twist = Twist()
     no_twist.linear.x, no_twist.linear.y, no_twist.linear.z = 0, 0, 0
@@ -83,6 +88,8 @@ def main():
 
         tracker_pos = np.array(tracker_pos)
         arm_position = np.array(arm_position)
+        #offset tracker position so that robot sword meets at mid point
+        tracker_pos[2] -= sword_zoffset
         displacement = tracker_pos - arm_position
 
         # set velocity in the direction of the displacement
@@ -101,7 +108,7 @@ def main():
         arm_twist.angular.z = 0
 
         pos_diff = np.linalg.norm(old_tracker_pose) - tracker_pos_mag
-
+        pub.publish(disp_mag)
         # if user sword is less than 1.25m to robot
         # and distance between robot arm and user sword is less than 0.15m
         # and user sword is moving towards robot...
@@ -110,9 +117,9 @@ def main():
             move(arm_twist)
         elif tracker_pos_mag > 1.25:
             #pass
-            #move(no_twist)
             arm.set_joint_positions(home_config)
         else:
+            #pass
             move(no_twist)
 
 

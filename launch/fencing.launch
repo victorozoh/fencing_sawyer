@@ -24,12 +24,12 @@
   <node
     pkg="fencing_sawyer"
     name="parry"
-    type="parry.py"
+    type="parrytest.py"
     output="screen"
     launch-prefix="gnome-terminal --command"
   >
   </node>
   <!-- play sound -->
-  <!-- <node pkg="fencing_sawyer" name="sound_player" type="soundplayer.py"/> -->
+  <node pkg="fencing_sawyer" name="sound_player" type="soundplayer.py"/>
 
 </launch>
