@@ -17,25 +17,26 @@ def main():
 
     armpose = arm.endpoint_pose()
     quat_arr = armpose['orientation']
-    # print("position is {}".format(armpose['position']))
-    print("orientation is {}".format(quat_arr))
-    euler_angles = euler_from_quaternion(quat_arr, 'sxyz')
-    print("The euler angles are {}".format(euler_angles))
+    print("position is {}".format(armpose['position']))
     print("\n")
+    print("orientation is {}".format(quat_arr))
+    # euler_angles = euler_from_quaternion(quat_arr, 'sxyz')
+    # print("The euler angles are {}".format(euler_angles))
 
-    joints = arm.joint_angles()
+
+    #joints = arm.joint_angles()
     #print(joints)
-    rate = rospy.Rate(10.0)
-    while not rospy.is_shutdown():
-        try:
-            # (controller_pos, controller_quat) = listener.lookupTransform('world', 'controller', rospy.Time(0))
-            (pos, quat) = tf_listener.lookupTransform('world', 'reference/right_hand', rospy.Time(0))
-            print("right hand orientation is {}".format(euler_from_quaternion(quat, 'sxyz')))
-        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-            continue
-        rate.sleep()
+    # rate = rospy.Rate(10.0)
+    # while not rospy.is_shutdown():
+    #     try:
+    #         # (controller_pos, controller_quat) = listener.lookupTransform('world', 'controller', rospy.Time(0))
+    #         (pos, quat) = tf_listener.lookupTransform('world', 'reference/right_hand', rospy.Time(0))
+    #         print("right hand orientation is {}".format(euler_from_quaternion(quat, 'sxyz')))
+    #     except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+    #         continue
+    #     rate.sleep()
 
-    #rospy.spin()
+    rospy.spin()
 
 
 if __name__ == "__main__":

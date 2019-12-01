@@ -23,12 +23,16 @@
   <!-- tf listener with respect to end effector -->
   <node
     pkg="fencing_sawyer"
-    name="parry"
-    type="parrytest.py"
+    name="fencer"
+    type="fencer.py"
     output="screen"
     launch-prefix="gnome-terminal --command"
   >
   </node>
+
+  <node pkg="fencing_sawyer" name="modify_urdf" type="send_urdf_fragment.py"/>
+
+
   <!-- play sound -->
   <node pkg="fencing_sawyer" name="sound_player" type="soundplayer.py"/>
 

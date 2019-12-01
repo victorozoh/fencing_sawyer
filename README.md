@@ -22,9 +22,9 @@ The goal for the end of this quarter is to learn motion planning in ROS using th
 ## Components and Tools
 - Ubuntu 18.04
 - ROS Melodic
-- Unity 3D
-- HTC Vive Virtual Reality System
+- SteamVR
 - Sawyer Robot
+- Modern Robotics Python Library
 
 ## Installation Instructions
 - Follow the [instructions here](https://github.com/robosavvy/vive_ros) to install the vive_ros package and to install steam on your machine.
@@ -34,7 +34,6 @@ The goal for the end of this quarter is to learn motion planning in ROS using th
 ```
 Change the saying ```"requireHmd":true ``` to ```"requireHmd": false ```
 ## Package References
-- [ROS to Unity connection package](https://github.com/h2r/ros_reality)
 - [ROS Package for publishing HTC Vive device locations](https://github.com/robosavvy/vive_ros)
 
 

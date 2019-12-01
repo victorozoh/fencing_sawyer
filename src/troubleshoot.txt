@@ -30,6 +30,10 @@ rosrun intera_examples go_to_joint_angles.py -q 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 rosrun intera_examples gripper_cuff_control.py -h
 
 
+# output to separate terminal
+  <!-- launch-prefix="gnome-terminal --command" -->
+
+
 TUTORIAL LINKS
 https://sdk.rethinkrobotics.com/intera/Motion_Interface_Tutorial#Go_to_Joint_Angles
 # documentation
