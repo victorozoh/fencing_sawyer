@@ -22,7 +22,6 @@ class SoundPlayer():
             play(self.clash_sound)
 
 
-
     def playsound(self, msg):
         if msg.twist.linear.x < 0:
             self.player.play()

@@ -4,14 +4,12 @@
   <link name="sword_tip" />
 
   <joint name="joint1" type="fixed">
-
     <parent link="right_hand"/>
     <child link="sword_mid"/>
     <origin xyz="0 0 0" rpy="0 0 0" />
   </joint>
 
   <joint name="joint2" type="fixed">
-
     <parent link="sword_mid"/>
     <child link="sword_tip"/>
     <origin xyz="0.25 0 0" rpy="0 0 0" />

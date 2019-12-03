@@ -24,7 +24,7 @@
   <node
     pkg="fencing_sawyer"
     name="fencer"
-    type="fencer.py"
+    type="fencer2.py"
     output="screen"
     launch-prefix="gnome-terminal --command"
   >
