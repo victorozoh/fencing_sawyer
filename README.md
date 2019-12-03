@@ -1,4 +1,4 @@
-Human Robot Interaction via virtual reality and ROS integration
+Fencing Robot using the HTC Vive Tracker
 =============================
 
 #### *Victor Ozoh -- MS in Robotics Fall Project - Northwestern University*
