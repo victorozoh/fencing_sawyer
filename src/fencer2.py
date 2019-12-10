@@ -5,6 +5,7 @@ from intera_interface import Limb
 import modern_robotics as mr
 import numpy as np
 import tf
+import time
 from geometry_msgs.msg import Transform, Twist, TwistStamped
 from std_msgs.msg import Float64
 import sawyer_MR_description as sw
@@ -23,15 +24,16 @@ class Fencer():
         self.home_config = {'right_j6': -1.3186796875, 'right_j5': 0.5414912109375,
                        'right_j4': 2.9682451171875, 'right_j3': 1.7662939453125,
                        'right_j2': -3.0350302734375, 'right_j1': 1.1202939453125, 'right_j0': -0.0001572265625}
-
+        self.attack_state = None
         self.tracker_position = None
         self.tracker_pos_mag = None
         self.arm_position = None
         self.sword_position = None
         self.attack_position = None
         self.disp_mag = None
-        self.fence_region = 1.35
-        self.fence_speed = 0.40
+        self.attack_disp_mag = None
+        self.fence_region = 1.50
+        self.fence_speed = 0.60
         self.sword_zoffset = 0.25
         self.end_effector_directions = [-1.0, 1.0]
         self.tracker_twist = 50
@@ -112,53 +114,23 @@ class Fencer():
             self.sword_position = np.array(self.sword_position)
             #offset tracker position so that robot sword meets at mid point
             self.tracker_position[2] += self.sword_zoffset
-            #
-            displacement = self.tracker_position - self.sword_position
-
-            # set velocity in the direction of the displacement
-            self.disp_mag = np.linalg.norm(displacement)
-            self.clash_pub.publish(self.disp_mag)
-            self.tracker_pos_mag = np.linalg.norm(self.tracker_position)
-            # print("distance between tracker and world {}".format(tracker_pos_mag))
-            # print("The distance between the arm and tracker is {}".format(disp_mag))
-            #print("distance is {}".format(tracker_pos_mag))
-
-            self.arm_twist.linear.x =  self.fence_speed * displacement[0]/self.disp_mag
-            self.arm_twist.linear.y =  self.fence_speed * displacement[1]/self.disp_mag
-            self.arm_twist.linear.z =  self.fence_speed * displacement[2]/self.disp_mag
-            self.arm_twist.angular.x = self.fence_speed * np.random.choice(self.end_effector_directions)
-            self.arm_twist.angular.y = 0
-            self.arm_twist.angular.z = 0
-
-            pos_diff = np.linalg.norm(old_tracker_pose) - self.tracker_pos_mag
-            print("tracker twist is {}".format(self.tracker_twist))
-
             # self.fence_logic()
-            if self.tracker_pos_mag < self.fence_region and self.disp_mag > 0.07:
-                self.move(self.arm_twist)
-                if self.tracker_twist < 0.15:
-                    self.arm.set_joint_positions(self.arm.joint_angles())
-            elif self.tracker_pos_mag > self.fence_region:
-                self.arm.set_joint_positions(self.home_config)
+            if self.tracker_twist > 0.20: # user moving sword
+                self.defend()
             else:
-                #pass
-                self.move(self.no_twist)
+                self.attack()
 
-            old_tracker_pose = self.tracker_pos_mag
             self.rate.sleep()
 
-    def attack(self):
-        # define new attack point
-        x_point = np.random.uniform(low=self.tracker_position[0]+0.05 ,high=self.tracker_position[0]+0.20)
-        y_point = np.random.uniform(low=self.tracker_position[1]-0.10 ,high=self.tracker_position[1]+0.20)
-        z_point = np.random.uniform(low=self.tracker_position[2]-0.10 ,high=self.tracker_position[2]+0.20)
 
-        self.attack_position = np.array([x_point, y_point, z_point])
-        displacement = self.attack_position - self.sword_position
+    def defend(self):
+        displacement = self.tracker_position - self.sword_position
+
         # set velocity in the direction of the displacement
         self.disp_mag = np.linalg.norm(displacement)
         self.clash_pub.publish(self.disp_mag)
-
+        self.tracker_pos_mag = np.linalg.norm(self.tracker_position)
+        # print("distance between tracker and world {}".format(tracker_pos_mag))
         self.arm_twist.linear.x =  self.fence_speed * displacement[0]/self.disp_mag
         self.arm_twist.linear.y =  self.fence_speed * displacement[1]/self.disp_mag
         self.arm_twist.linear.z =  self.fence_speed * displacement[2]/self.disp_mag
@@ -166,19 +138,46 @@ class Fencer():
         self.arm_twist.angular.y = 0
         self.arm_twist.angular.z = 0
 
-        self.move(self.arm_twist)
+        print("tracker twist is {}".format(self.tracker_twist))
 
-    def fence_logic(self):
-        # if user sword is less than 1.25m to robot
-        # and distance between robot arm and user sword is less than 0.15m
-        # and user sword is moving towards robot...
-        if self.tracker_pos_mag < 1.25 and self.disp_mag > 0.07:
+        if self.tracker_pos_mag < self.fence_region and self.disp_mag > 0.07:
             #pass
             self.move(self.arm_twist)
-            if self.tracker_twist < 0.15:
+            if self.disp_mag < 0.40:
                 self.arm.set_joint_positions(self.arm.joint_angles())
-        elif self.tracker_pos_mag > 1.25:
+                #time.sleep(1)
+        elif self.tracker_pos_mag > self.fence_region:
+            self.arm.set_joint_positions(self.home_config)
+        else:
             #pass
+            self.move(self.no_twist)
+
+
+    def attack(self):
+        #self.arm.set_joint_positions(self.home_config)
+        # define new attack point
+        x_point = np.random.uniform(low=self.tracker_position[0]+0.10 ,high=self.tracker_position[0]+0.10)
+        y_point = np.random.uniform(low=self.tracker_position[1]-0.50 ,high=self.tracker_position[1])
+        z_point = np.random.uniform(low=self.tracker_position[2] ,high=self.tracker_position[2]+0.40)
+
+        self.attack_position = np.array([x_point, y_point, z_point])
+        displacement = self.attack_position - self.arm_position
+        # set velocity in the direction of the displacement
+        self.attack_disp_mag = np.linalg.norm(displacement)
+        self.clash_pub.publish(self.disp_mag)
+
+        self.arm_twist.linear.x =  self.fence_speed * displacement[0]/self.attack_disp_mag
+        self.arm_twist.linear.y =  self.fence_speed * displacement[1]/self.attack_disp_mag
+        self.arm_twist.linear.z =  self.fence_speed * displacement[2]/self.attack_disp_mag
+        self.arm_twist.angular.x = 0
+        self.arm_twist.angular.y = self.fence_speed * np.random.choice(self.end_effector_directions)
+        self.arm_twist.angular.z = 0
+
+        self.move(self.arm_twist)
+        if self.disp_mag < 0.40:
+            self.arm.set_joint_positions(self.arm.joint_angles())
+            #time.sleep(1)
+        elif self.tracker_pos_mag > self.fence_region:
             self.arm.set_joint_positions(self.home_config)
         else:
             #pass
