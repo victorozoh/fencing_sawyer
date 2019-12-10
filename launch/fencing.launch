@@ -9,8 +9,8 @@
   </include>
 
   <!-- include ar tag tracking launch file -->
-  <include file="$(find fencing_sawyer)/launch/tag.launch">
-  </include>
+  <!-- <include file="$(find fencing_sawyer)/launch/tag.launch">
+  </include> -->
 
   <!-- display image to sawyer's head -->
   <node pkg="fencing_sawyer" name="display_head" type="display_head.py"/>

@@ -108,6 +108,10 @@ class Fencer():
                 # get tag position
                 # (self.tag_position, _) = self.tf_listener.lookupTransform('world', 'ar_marker_0', rospy.Time(0))
             except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+                self.tracker_position = None
+                self.sword_position = None
+                self.tag_position = None
+                self.arm.set_joint_positions(self.home_config)
                 continue
 
             # get arm position
@@ -131,12 +135,11 @@ class Fencer():
 
 
     def defend(self):
-        if self.tracker_position:
-            displacement = self.tracker_position - self.sword_position
-        else:
+        if self.tracker_position is None:
             self.arm.set_joint_positions(self.home_config)
             return
-
+        else:
+            displacement = self.tracker_position - self.sword_position
         # set velocity in the direction of the displacement
         self.disp_mag = np.linalg.norm(displacement)
         self.clash_pub.publish(self.disp_mag)
@@ -170,11 +173,12 @@ class Fencer():
         z_point = np.random.uniform(low=self.tracker_position[2] ,high=self.tracker_position[2]+0.40)
 
         self.attack_position = np.array([x_point, y_point, z_point])
-        if self.tag_position:
-            displacement = self.tag_position - self.arm_position
-        else:
-            self.arm.set_joint_positions(self.home_config)
-            return
+        # if self.tag_position is None:
+        #     self.arm.set_joint_positions(self.home_config)
+        #     return
+        # else:
+        #     displacement = self.tag_position - self.arm_position
+        displacement = self.attack_position - self.arm_position
         # set velocity in the direction of the displacement
         self.attack_disp_mag = np.linalg.norm(displacement)
         self.clash_pub.publish(self.disp_mag)
