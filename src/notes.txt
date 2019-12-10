@@ -6,3 +6,5 @@ The parameter is used to set the vive_tracker frame with respect to the sawyer r
 Created a private member named robot_world in the VIVEnode class.
 
 2. Modified the vive.launch file to set the parameter of the vive_node
+
+launch-prefix="gnome-terminal --command"

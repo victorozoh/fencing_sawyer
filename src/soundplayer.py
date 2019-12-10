@@ -13,7 +13,6 @@ class SoundPlayer():
         self.saber_on = AudioSegment.from_mp3("/home/victor/sawyerws/src/fencing_sawyer/assets/SaberOn.mp3")
         play(self.saber_on)
         self.clash_sound = AudioSegment.from_mp3("/home/victor/sawyerws/src/fencing_sawyer/assets/clash2.mp3")
-        #self.twist_sub = rospy.Subscriber('/vive/twist1', TwistStamped, self.playsound, queue_size=1)
         self.sub = rospy.Subscriber('clash', Float64, self.clash_callback, queue_size=1)
 
 

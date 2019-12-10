@@ -8,17 +8,12 @@
     <arg name="desired_robot_frame" value="$(arg robot_frame)"/>
   </include>
 
+  <!-- include ar tag tracking launch file -->
+  <include file="$(find fencing_sawyer)/launch/tag.launch">
+  </include>
+
   <!-- display image to sawyer's head -->
   <node pkg="fencing_sawyer" name="display_head" type="display_head.py"/>
-  <!-- publish vive controller pose -->
-  <!-- <node pkg="fencing_sawyer" name="get_pose" type="get_pose.py"/> -->
-  <!-- track the vive pose -->
-  <!-- <node pkg="fencing_sawyer" name="vive_tracker_pose" type="vive_tracker_pose.py"/> -->
-
-  <!-- publish vive controller twist -->
-  <!-- <node pkg="fencing_sawyer" name="get_twist" type="get_twist.py"/> -->
-  <!-- track the vive twist -->
-  <!-- <node pkg="fencing_sawyer" name="vive_tracker_twist" type="vive_tracker_twist.py"/> -->
 
   <!-- tf listener with respect to end effector -->
   <node
@@ -31,7 +26,6 @@
   </node>
 
   <node pkg="fencing_sawyer" name="modify_urdf" type="send_urdf_fragment.py"/>
-
 
   <!-- play sound -->
   <node pkg="fencing_sawyer" name="sound_player" type="soundplayer.py"/>

@@ -24,16 +24,17 @@ class Fencer():
         self.home_config = {'right_j6': -1.3186796875, 'right_j5': 0.5414912109375,
                        'right_j4': 2.9682451171875, 'right_j3': 1.7662939453125,
                        'right_j2': -3.0350302734375, 'right_j1': 1.1202939453125, 'right_j0': -0.0001572265625}
-        self.attack_state = None
+
         self.tracker_position = None
         self.tracker_pos_mag = None
         self.arm_position = None
         self.sword_position = None
         self.attack_position = None
+        self.tag_position = None
         self.disp_mag = None
         self.attack_disp_mag = None
         self.fence_region = 1.50
-        self.fence_speed = 0.60
+        self.fence_speed = 0.50
         self.sword_zoffset = 0.25
         self.end_effector_directions = [-1.0, 1.0]
         self.tracker_twist = 50
@@ -53,6 +54,8 @@ class Fencer():
         self.no_twist.angular.z = 0
 
         self.arm = Limb()
+        print("going to home configuration")
+        self.arm.set_joint_positions(self.home_config)
         self.clash_pub = rospy.Publisher('clash', Float64, queue_size=1)
         self.twist_sub = rospy.Subscriber('/vive/twist1', TwistStamped, self.twist_callback, queue_size=1)
         self.tf_listener = tf.TransformListener()
@@ -95,7 +98,6 @@ class Fencer():
                                              msg.twist.linear.z])
 
     def fence(self):
-        old_tracker_pose = 0
 
         while not rospy.is_shutdown():
             try:
@@ -103,18 +105,23 @@ class Fencer():
                 (self.tracker_position, _) = self.tf_listener.lookupTransform('world', 'tracker', rospy.Time(0))
                 # get sword pose
                 (self.sword_position, _) = self.tf_listener.lookupTransform('world', 'sword_tip', rospy.Time(0))
-                # get arm position
-                armpose = self.arm.endpoint_pose()
-                self.arm_position = armpose['position']
+                # get tag position
+                # (self.tag_position, _) = self.tf_listener.lookupTransform('world', 'ar_marker_0', rospy.Time(0))
             except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
                 continue
+
+            # get arm position
+            armpose = self.arm.endpoint_pose()
+            self.arm_position = armpose['position']
 
             self.tracker_position = np.array(self.tracker_position)
             self.arm_position = np.array(self.arm_position)
             self.sword_position = np.array(self.sword_position)
+            self.tag_position = np.array(self.tag_position)
             #offset tracker position so that robot sword meets at mid point
             self.tracker_position[2] += self.sword_zoffset
-            # self.fence_logic()
+
+            print("tracker twist is {}".format(self.tracker_twist))
             if self.tracker_twist > 0.20: # user moving sword
                 self.defend()
             else:
@@ -124,7 +131,11 @@ class Fencer():
 
 
     def defend(self):
-        displacement = self.tracker_position - self.sword_position
+        if self.tracker_position:
+            displacement = self.tracker_position - self.sword_position
+        else:
+            self.arm.set_joint_positions(self.home_config)
+            return
 
         # set velocity in the direction of the displacement
         self.disp_mag = np.linalg.norm(displacement)
@@ -138,14 +149,12 @@ class Fencer():
         self.arm_twist.angular.y = 0
         self.arm_twist.angular.z = 0
 
-        print("tracker twist is {}".format(self.tracker_twist))
-
         if self.tracker_pos_mag < self.fence_region and self.disp_mag > 0.07:
             #pass
             self.move(self.arm_twist)
             if self.disp_mag < 0.40:
                 self.arm.set_joint_positions(self.arm.joint_angles())
-                #time.sleep(1)
+                time.sleep(1)
         elif self.tracker_pos_mag > self.fence_region:
             self.arm.set_joint_positions(self.home_config)
         else:
@@ -161,7 +170,11 @@ class Fencer():
         z_point = np.random.uniform(low=self.tracker_position[2] ,high=self.tracker_position[2]+0.40)
 
         self.attack_position = np.array([x_point, y_point, z_point])
-        displacement = self.attack_position - self.arm_position
+        if self.tag_position:
+            displacement = self.tag_position - self.arm_position
+        else:
+            self.arm.set_joint_positions(self.home_config)
+            return
         # set velocity in the direction of the displacement
         self.attack_disp_mag = np.linalg.norm(displacement)
         self.clash_pub.publish(self.disp_mag)
@@ -176,17 +189,18 @@ class Fencer():
         self.move(self.arm_twist)
         if self.disp_mag < 0.40:
             self.arm.set_joint_positions(self.arm.joint_angles())
-            #time.sleep(1)
+            time.sleep(1)
         elif self.tracker_pos_mag > self.fence_region:
             self.arm.set_joint_positions(self.home_config)
         else:
             #pass
-            self.move(self.no_twist)
+            #self.move(self.no_twist)
+            self.arm.set_joint_positions(self.home_config)
 
 
 
 if __name__ == '__main__':
     rospy.init_node("fencer")
-
+    # initialize fence object
     fencer = Fencer()
     fencer.fence()
